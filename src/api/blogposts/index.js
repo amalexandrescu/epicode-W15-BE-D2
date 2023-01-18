@@ -68,4 +68,66 @@ blogpostsRouter.delete("/:blogId", async (req, res, next) => {
   }
 });
 
+// ********************** Embedding comments into blogposts ************************
+
+blogpostsRouter.post("/:id", async (req, res, next) => {
+  try {
+    //in the req.body we will have the content of the comment we want to add
+
+    //we need to find the blog we want to update using the id from the params and update it with
+    //the comment from the req.body
+
+    const searchedBlog = await BlogsModel.findById(req.params.id);
+
+    if (searchedBlog) {
+      const updatedBlog = await BlogsModel.findByIdAndUpdate(
+        req.params.id,
+        {
+          $push: {
+            comments: {
+              ...req.body,
+              // createdAd: new Date(),
+              // updatedAt: new Date(),
+            },
+          },
+        },
+        { new: true, runValidators: true }
+      );
+      res.send(updatedBlog);
+    } else {
+      next(createHttpError(404, `Blog with id ${req.params.blogId} not found`));
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+blogpostsRouter.get("/:id/comments", async (req, res, next) => {
+  try {
+  } catch (error) {
+    next(error);
+  }
+});
+
+blogpostsRouter.get("/:id/comments/:commentId", async (req, res, next) => {
+  try {
+  } catch (error) {
+    next(error);
+  }
+});
+
+blogpostsRouter.put("/:id/comment/:commentId", async (req, res, next) => {
+  try {
+  } catch (error) {
+    next(error);
+  }
+});
+
+blogpostsRouter.delete("/:id/comment/:commentId", async (req, res, next) => {
+  try {
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default blogpostsRouter;
