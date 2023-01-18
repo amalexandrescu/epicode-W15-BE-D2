@@ -2,6 +2,15 @@ import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
 
+const commentsSchema = new Schema(
+  {
+    content: String,
+  },
+  {
+    timestamps: true,
+  }
+);
+
 const blogsSchema = new Schema(
   {
     category: { type: String, required: true },
@@ -16,7 +25,7 @@ const blogsSchema = new Schema(
       avatar: { type: String, required: true },
     },
     content: { type: String, required: true },
-    comments: [{ content: String }],
+    comments: [commentsSchema],
   },
   {
     timestamps: true, // this option automatically the createdAt and updatedAt fields

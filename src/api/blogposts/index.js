@@ -1,6 +1,7 @@
 import express from "express";
 import createHttpError from "http-errors";
 import BlogsModel from "./model.js";
+import q2m from "query-to-mongo";
 
 const blogpostsRouter = express.Router();
 
@@ -16,8 +17,25 @@ blogpostsRouter.post("/", async (req, res, next) => {
 
 blogpostsRouter.get("/", async (req, res, next) => {
   try {
-    const blogs = await BlogsModel.find();
-    res.send(blogs);
+    console.log("queries: ", req.query);
+
+    const mongoQuery = q2m(req.query);
+
+    console.log("mongo queries: ", mongoQuery);
+
+    const total = await BlogsModel.countDocuments(mongoQuery.criteria);
+
+    console.log("total: ", total);
+
+    const blogs = await BlogsModel.find()
+      .sort(mongoQuery.options.sort)
+      .skip(mongoQuery.options.skip)
+      .limit(mongoQuery.options.limit);
+    res.send({
+      links: mongoQuery.links("http:localhost:3001/blogPosts", total),
+      totalPages: Math.ceil(total / mongoQuery.options.limit),
+      blogs,
+    });
   } catch (error) {
     next(error);
   }
@@ -86,8 +104,6 @@ blogpostsRouter.post("/:id", async (req, res, next) => {
           $push: {
             comments: {
               ...req.body,
-              // createdAd: new Date(),
-              // updatedAt: new Date(),
             },
           },
         },
