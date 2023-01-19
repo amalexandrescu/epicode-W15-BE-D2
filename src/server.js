@@ -9,6 +9,7 @@ import {
   notFoundHandler,
 } from "./errorHandlers.js";
 import authorsRouter from "./api/authors/index.js";
+import usersRouter from "./api/users/index.js";
 
 const server = express();
 
@@ -23,6 +24,7 @@ server.use(express.json());
 
 server.use("/blogPosts", blogpostsRouter);
 server.use("/authors", authorsRouter);
+server.use("/users", usersRouter);
 
 //Error handlers
 

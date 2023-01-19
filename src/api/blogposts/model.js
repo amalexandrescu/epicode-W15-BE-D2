@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
 
@@ -27,6 +27,12 @@ const blogsSchema = new Schema(
       // name: { type: String, required: true },
       // avatar: { type: String, required: true },
     },
+    likes: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     content: { type: String, required: true },
     comments: [commentsSchema],
   },

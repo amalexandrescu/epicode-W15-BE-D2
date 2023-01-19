@@ -2,6 +2,7 @@ import express from "express";
 import createHttpError from "http-errors";
 import BlogsModel from "./model.js";
 import q2m from "query-to-mongo";
+import UsersModel from "../users/model.js";
 
 const blogpostsRouter = express.Router();
 
@@ -211,6 +212,46 @@ blogpostsRouter.delete("/:id/comment/:commentId", async (req, res, next) => {
     } else {
       next(createHttpError(404, `Blog with id ${req.params.id} not found`));
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ***************** how many LIKES does a blogpost have *****************
+
+blogpostsRouter.post("/:id/likes", async (req, res, next) => {
+  try {
+    //where :id is the id of the blogpost
+    //in the req.body we will get the userId
+
+    const { userId } = req.body;
+
+    const blog = await BlogsModel.findById(req.params.id);
+
+    if (!blog) {
+      return next(
+        createHttpError(404, `Blog with id ${req.params.id} not found`)
+      );
+    }
+
+    const user = await UsersModel.findById(userId);
+
+    if (!user) {
+      return next(createHttpError(404, `User with id ${userId} not found`));
+    }
+
+    // const userAlreadyLikedTheBlog = await BlogsModel.findOne({
+    //   likes: req.params.userId,
+    // });
+
+    // if (!userAlreadyLikedTheBlog) {
+    const modifiedBlog = await BlogsModel.findOneAndUpdate(
+      blog, // WHAT
+      { $push: { likes: userId } }, // HOW
+      { new: true, runValidators: true } // OPTIONS, upsert:true means if the active cart of that user is NOT found --> Mongo please create that automagically (also with the bookId and quantity in it)
+    );
+    res.send(modifiedBlog);
+    // }
   } catch (error) {
     next(error);
   }
