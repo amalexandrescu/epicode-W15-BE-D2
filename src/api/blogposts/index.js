@@ -17,25 +17,26 @@ blogpostsRouter.post("/", async (req, res, next) => {
 
 blogpostsRouter.get("/", async (req, res, next) => {
   try {
-    console.log("queries: ", req.query);
+    // console.log("queries: ", req.query);
+    // const mongoQuery = q2m(req.query);
+    // console.log("mongo queries: ", mongoQuery);
+    // const total = await BlogsModel.countDocuments(mongoQuery.criteria);
+    // const total = await BlogsModel.findBlogsWithAuthors(mongoQuery);// this is if I want to use the custom method, see the model.js where I declared it
+    // console.log("total: ", total);
+    // const blogs = await BlogsModel.find()
+    //   .sort(mongoQuery.options.sort)
+    //   .skip(mongoQuery.options.skip)
+    //   .limit(mongoQuery.options.limit);
+    // res.send({
+    //   links: mongoQuery.links("http:localhost:3001/blogPosts", total),
+    //   totalPages: Math.ceil(total / mongoQuery.options.limit),
+    //   blogs,
+    // });
 
-    const mongoQuery = q2m(req.query);
+    //the commented cod eabove is if I want to use some queries when fetching the data
 
-    console.log("mongo queries: ", mongoQuery);
-
-    const total = await BlogsModel.countDocuments(mongoQuery.criteria);
-
-    console.log("total: ", total);
-
-    const blogs = await BlogsModel.find()
-      .sort(mongoQuery.options.sort)
-      .skip(mongoQuery.options.skip)
-      .limit(mongoQuery.options.limit);
-    res.send({
-      links: mongoQuery.links("http:localhost:3001/blogPosts", total),
-      totalPages: Math.ceil(total / mongoQuery.options.limit),
-      blogs,
-    });
+    const blogs = await BlogsModel.find();
+    res.send(blogs);
   } catch (error) {
     next(error);
   }
@@ -43,7 +44,10 @@ blogpostsRouter.get("/", async (req, res, next) => {
 
 blogpostsRouter.get("/:blogId", async (req, res, next) => {
   try {
-    const blog = await BlogsModel.findById(req.params.blogId);
+    const blog = await BlogsModel.findById(req.params.blogId).populate({
+      path: "author",
+      select: "name email",
+    });
     if (blog) {
       res.send(blog);
     } else {

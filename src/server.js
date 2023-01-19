@@ -8,6 +8,7 @@ import {
   genericErrorHandler,
   notFoundHandler,
 } from "./errorHandlers.js";
+import authorsRouter from "./api/authors/index.js";
 
 const server = express();
 
@@ -21,6 +22,7 @@ server.use(express.json());
 //Endpoints
 
 server.use("/blogPosts", blogpostsRouter);
+server.use("/authors", authorsRouter);
 
 //Error handlers
 
