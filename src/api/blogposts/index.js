@@ -8,6 +8,27 @@ import { adminOnlyMiddleware } from "../../library/authentication/adminOnly.js";
 
 const blogpostsRouter = express.Router();
 
+blogpostsRouter.get(
+  "/me/stories",
+  basicAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const blogs = await BlogsModel.find().populate({ path: "author" });
+
+      const allBlogs = blogs.filter((blog) => {
+        if (blog.author._id.toString() === req.author._id.toString()) {
+          return blog;
+        }
+      });
+      console.log(allBlogs);
+      console.log("header", req.author);
+      res.send(allBlogs);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 blogpostsRouter.post("/", async (req, res, next) => {
   try {
     const newBlog = new BlogsModel(req.body);
