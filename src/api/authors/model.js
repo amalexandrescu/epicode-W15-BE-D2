@@ -27,6 +27,16 @@ authorsSchema.pre("save", async function (next) {
   next();
 });
 
+authorsSchema.methods.toJSON = function () {
+  const authorDoc = this;
+  const author = authorDoc.toObject();
+  delete author.password;
+  delete author.createdAt;
+  delete author.updatedAt;
+  delete author.__v;
+  return author;
+};
+
 authorsSchema.static("checkCredentials", async function (email, password) {
   const author = await this.findOne({ email });
   if (author) {

@@ -1,6 +1,7 @@
 import express from "express";
 import createHttpError from "http-errors";
 import AuthorsModel from "./model.js";
+import { basicAuthMiddleware } from "../../library/authentication/basicAuth.js";
 
 const authorsRouter = express.Router();
 
@@ -23,7 +24,7 @@ authorsRouter.get("/", async (req, res, next) => {
   }
 });
 
-authorsRouter.get("/:authorId", async (req, res, next) => {
+authorsRouter.get("/:authorId", basicAuthMiddleware, async (req, res, next) => {
   try {
     const searchedAuthor = await AuthorsModel.findById(req.params.authorId);
 

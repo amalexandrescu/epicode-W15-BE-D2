@@ -3,6 +3,8 @@ import createHttpError from "http-errors";
 import BlogsModel from "./model.js";
 import q2m from "query-to-mongo";
 import UsersModel from "../users/model.js";
+import { basicAuthMiddleware } from "../../library/authentication/basicAuth.js";
+import { adminOnlyMiddleware } from "../../library/authentication/adminOnly.js";
 
 const blogpostsRouter = express.Router();
 
@@ -36,18 +38,18 @@ blogpostsRouter.get("/", async (req, res, next) => {
 
     //the commented cod eabove is if I want to use some queries when fetching the data
 
-    const blogs = await BlogsModel.find();
+    const blogs = await BlogsModel.find().populate({ path: "author" });
     res.send(blogs);
   } catch (error) {
     next(error);
   }
 });
 
-blogpostsRouter.get("/:blogId", async (req, res, next) => {
+blogpostsRouter.get("/:blogId", basicAuthMiddleware, async (req, res, next) => {
   try {
     const blog = await BlogsModel.findById(req.params.blogId).populate({
       path: "author",
-      select: "name email",
+      // select: "name email",
     });
     if (blog) {
       res.send(blog);
@@ -59,16 +61,21 @@ blogpostsRouter.get("/:blogId", async (req, res, next) => {
   }
 });
 
-blogpostsRouter.put("/:blogId", async (req, res, next) => {
+blogpostsRouter.put("/:blogId", basicAuthMiddleware, async (req, res, next) => {
   try {
     const updatedBlog = await BlogsModel.findByIdAndUpdate(
       req.params.blogId, // WHO you want to modify
       req.body, // HOW you want to modify
       { new: true, runValidators: true }
-    );
+    ).populate({ path: "author", select: "name surname email role" });
 
     if (updatedBlog) {
-      res.send(updatedBlog);
+      // console.log(updatedBlog);
+      if (req.author._id.toString() === updatedBlog.author._id.toString()) {
+        res.send(updatedBlog);
+      } else {
+        next(createHttpError(401, "it's not your post"));
+      }
     } else {
       next(createHttpError(404, `Blog with id ${req.params.blogId} not found`));
     }
@@ -77,19 +84,29 @@ blogpostsRouter.put("/:blogId", async (req, res, next) => {
   }
 });
 
-blogpostsRouter.delete("/:blogId", async (req, res, next) => {
-  try {
-    const deletedBlog = await BlogsModel.findByIdAndDelete(req.params.blogId);
+blogpostsRouter.delete(
+  "/:blogId",
+  basicAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const deletedBlog = await BlogsModel.findByIdAndDelete(req.params.blogId);
 
-    if (deletedBlog) {
-      res.status(204).send();
-    } else {
-      next(createHttpError(404, `Blog with id ${req.params.blogId} not found`));
+      if (deletedBlog) {
+        if (req.author._id.toString() === deletedBlog.author._id.toString()) {
+          res.status(204).send();
+        } else {
+          next(createHttpError(401, "it's not your post to delete"));
+        }
+      } else {
+        next(
+          createHttpError(404, `Blog with id ${req.params.blogId} not found`)
+        );
+      }
+    } catch (error) {
+      next(error);
     }
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 // ********************** Embedding comments into blogposts ************************
 

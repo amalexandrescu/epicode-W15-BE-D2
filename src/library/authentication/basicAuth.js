@@ -17,6 +17,7 @@ export const basicAuthMiddleware = async (req, res, next) => {
     const author = await AuthorsModel.checkCredentials(email, password);
     if (author) {
       req.author = author;
+      next();
     } else {
       next(createHttpError(401, "Credentials not ok!"));
     }
