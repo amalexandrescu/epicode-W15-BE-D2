@@ -84,22 +84,26 @@ blogpostsRouter.get("/:blogId", basicAuthMiddleware, async (req, res, next) => {
 
 blogpostsRouter.put("/:blogId", basicAuthMiddleware, async (req, res, next) => {
   try {
-    const updatedBlog = await BlogsModel.findByIdAndUpdate(
-      req.params.blogId, // WHO you want to modify
-      req.body, // HOW you want to modify
-      { new: true, runValidators: true }
-    ).populate({ path: "author", select: "name surname email role" });
+    //get the blog
+    const searchedBlog = await BlogsModel.findById(req.params.blogId);
+    console.log(req.author);
+    console.log(searchedBlog);
 
-    if (updatedBlog) {
-      // console.log(updatedBlog);
-      if (req.author._id.toString() === updatedBlog.author._id.toString()) {
-        res.send(updatedBlog);
-      } else {
-        next(createHttpError(401, "it's not your post"));
-      }
+    if (searchedBlog.author.toString() === req.author._id.toString()) {
+      const updatedBlog = await BlogsModel.findByIdAndUpdate(
+        req.params.blogId, // WHO you want to modify
+        req.body, // HOW you want to modify
+        { new: true, runValidators: true }
+      );
+
+      res.send(updatedBlog);
     } else {
-      next(createHttpError(404, `Blog with id ${req.params.blogId} not found`));
+      next(createHttpError(401, `unauthorzed, not your post`));
     }
+
+    //check blog author id with the one from authorization header
+
+    //if they are equal, update
   } catch (error) {
     next(error);
   }
