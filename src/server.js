@@ -5,8 +5,10 @@ import blogpostsRouter from "./api/blogposts/index.js";
 import mongoose from "mongoose";
 import {
   badRequestHandler,
+  forbiddenHandler,
   genericErrorHandler,
   notFoundHandler,
+  unauthorizedHandler,
 } from "./errorHandlers.js";
 import authorsRouter from "./api/authors/index.js";
 import usersRouter from "./api/users/index.js";
@@ -29,6 +31,8 @@ server.use("/users", usersRouter);
 //Error handlers
 
 server.use(badRequestHandler);
+server.use(unauthorizedHandler);
+server.use(forbiddenHandler);
 server.use(notFoundHandler);
 server.use(genericErrorHandler);
 
