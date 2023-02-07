@@ -17,6 +17,16 @@ const authorsSchema = new Schema(
   }
 );
 
+authorsSchema.pre("save", async function (next) {
+  const currentAuthor = this;
+  if (currentAuthor.isModified("password")) {
+    const plainPassword = currentAuthor.password;
+    currentAuthor.password = await bcrypt.hash(plainPassword, 10);
+  }
+
+  next();
+});
+
 authorsSchema.static("checkCredentials", async function (email, password) {
   const author = await this.findOne({ email });
   if (author) {
