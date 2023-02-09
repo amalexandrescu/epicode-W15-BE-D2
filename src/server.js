@@ -3,6 +3,7 @@ import cors from "cors";
 import listEndpoints from "express-list-endpoints";
 import blogpostsRouter from "./api/blogposts/index.js";
 import mongoose from "mongoose";
+import passport from "passport";
 import {
   badRequestHandler,
   forbiddenHandler,
@@ -13,10 +14,13 @@ import {
 import authorsRouter from "./api/authors/index.js";
 import usersRouter from "./api/users/index.js";
 import createHttpError from "http-errors";
+import googleStrategy from "./library/authentication/google.js";
 
 const server = express();
 
 const port = process.env.PORT || 3001;
+
+passport.use("google", googleStrategy);
 
 //Middlewares
 
@@ -39,6 +43,7 @@ const corsOpts = {
 
 server.use(cors(corsOpts));
 server.use(express.json());
+server.use(passport.initialize()); // Do not forget to inform Express that we need to use Passport!
 
 //Endpoints
 

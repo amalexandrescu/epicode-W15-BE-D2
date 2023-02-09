@@ -5,6 +5,7 @@ import { basicAuthMiddleware } from "../../library/authentication/basicAuth.js";
 import { adminOnlyMiddleware } from "../../library/authentication/adminOnly.js";
 import { JWTAuthMiddleware } from "../../library/authentication/jwtAuth.js";
 import { createAccessToken } from "../../library/authentication/tools.js";
+import passport from "passport";
 
 const authorsRouter = express.Router();
 
@@ -26,6 +27,24 @@ authorsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+
+// The purpose of this endpoint is to redirect users to Google Consent Screen
+authorsRouter.get(
+  "/googleLogin",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+// The purpose of this endpoint is to bring users back,
+//receiving a response from Google, then execute the callback function,
+//then send a response to the client
+authorsRouter.get(
+  "/googleRedirect",
+  passport.authenticate("google", { session: false }),
+  async (req, res, next) => {
+    console.log(req.user);
+    res.redirect(`${process.env.FE_URL}?accessToken=${req.user.accessToken}`);
+  }
+);
 
 authorsRouter.get("/:authorId", basicAuthMiddleware, async (req, res, next) => {
   try {
