@@ -13,6 +13,7 @@ const googleStrategy = new GoogleStrategy(
     // Here we are going to receive some informations about the user from Google (scopes --> profile, email)
 
     try {
+      console.log(profile);
       const { email, given_name, family_name } = profile._json;
 
       // 1. Check if the author is already in db

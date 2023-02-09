@@ -41,7 +41,7 @@ authorsRouter.get(
   "/googleRedirect",
   passport.authenticate("google", { session: false }),
   async (req, res, next) => {
-    console.log(req.user);
+    console.log("req", req.user);
     res.redirect(`${process.env.FE_URL}?accessToken=${req.user.accessToken}`);
   }
 );
