@@ -19,7 +19,10 @@ const googleStrategy = new GoogleStrategy(
       // 1. Check if the author is already in db
       const author = AuthorsModel.findOne({ email });
 
+      console.log("email", email);
+
       if (author) {
+        console.log(1);
         // 2. If he is there --> generate an accessToken (optionally a refresh token)
         const payload = { _id: author._id, role: author.role };
         const accessToken = await createAccessToken(payload);
@@ -28,6 +31,8 @@ const googleStrategy = new GoogleStrategy(
         passportNext(null, { accessToken });
         //null means no errors
       } else {
+        console.log(2);
+
         // 3. If the author is not in our db --> create that
         const newAuthor = new AuthorsModel({
           name: given_name,
