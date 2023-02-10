@@ -17,9 +17,9 @@ const googleStrategy = new GoogleStrategy(
       const { email, given_name, family_name } = profile._json;
 
       // 1. Check if the author is already in db
-      const author = AuthorsModel.findOne({ email });
+      const author = await AuthorsModel.findOne({ email });
 
-      console.log("email", email);
+      // console.log("email", email);
 
       if (author) {
         console.log(1);
@@ -31,8 +31,6 @@ const googleStrategy = new GoogleStrategy(
         passportNext(null, { accessToken });
         //null means no errors
       } else {
-        console.log(2);
-
         // 3. If the author is not in our db --> create that
         const newAuthor = new AuthorsModel({
           name: given_name,
